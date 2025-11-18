@@ -107,6 +107,28 @@ if 'forecaster' not in st.session_state:
     st.session_state.forecaster = None
 
 if 'pretrained_loader' not in st.session_state:
+    # Check if models exist, if not try to download them
+    models_dir = Path("models")
+    model_files = ['arima_model.pkl', 'lstm_model.h5', 'lstm_scaler.pkl']
+    models_exist = all((models_dir / f).exists() for f in model_files)
+    
+    if not models_exist:
+        logger.info("Models not found locally, attempting to download from Google Drive...")
+        try:
+            import subprocess
+            import sys
+            # Try to download models (will work if download_models.py is configured)
+            result = subprocess.run([sys.executable, 'download_models.py'], 
+                                  capture_output=True, 
+                                  text=True, 
+                                  timeout=300)  # 5 minute timeout
+            if result.returncode == 0:
+                logger.info("Models downloaded successfully")
+            else:
+                logger.warning("Model download failed or skipped")
+        except Exception as e:
+            logger.warning(f"Could not download models: {e}")
+    
     try:
         st.session_state.pretrained_loader = PreTrainedModelLoader()
         logger.info("Pre-trained models loaded successfully")

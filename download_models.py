@@ -14,19 +14,18 @@ import requests
 from pathlib import Path
 import sys
 
-# Google Drive file IDs for each model
-# Replace these with your actual Google Drive file IDs
+# Google Drive file IDs for each model (extracted from sharing links)
 MODEL_URLS = {
     'arima_model.pkl': {
-        'id': 'YOUR_ARIMA_FILE_ID',  # Replace with actual file ID
+        'id': '1fHxddDoT6LUDy0qKF5WaikBSHEaarT4N',
         'size_mb': 50
     },
     'lstm_model.h5': {
-        'id': 'YOUR_LSTM_FILE_ID',  # Replace with actual file ID
+        'id': '12jgUuEeONRH-VTy5pKS3ouVIIlBKQeLb',
         'size_mb': 4000
     },
     'lstm_scaler.pkl': {
-        'id': 'YOUR_SCALER_FILE_ID',  # Replace with actual file ID
+        'id': '113mLTxxVXy_oyUncMqgK1Xa1ks4PT7ft',
         'size_mb': 0.001
     },
     # SARIMAX model (1.2GB) - optional, may be too large
