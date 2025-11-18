@@ -291,4 +291,8 @@ For detailed information, see:
 - **DEPLOYMENT.md** - Deployment instructions
 - **PROJECT_SUMMARY.md** - Full summary
 
-**© 2025 PowerAI Lesotho | PowerAI Quick Reference**
+**Live Demo**: [powerai-lesotho.streamlit.app](https://powerai-lesotho.streamlit.app/)  
+**Email**: hlomohangsethuntsa3@gmail.com  
+**GitHub**: [github.com/Hlomohangcue/PLP-Final-Project-PowerAI](https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI)
+
+**© 2025 PowerAI Lesotho**

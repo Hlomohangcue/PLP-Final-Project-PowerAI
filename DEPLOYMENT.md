@@ -751,9 +751,10 @@ tail -f /var/log/powerai/app.log
 ## 📞 Support
 
 For deployment assistance:
-- **Email**: support@powerai.co.ls
-- **Documentation**: https://docs.powerai.com
-- **GitHub**: https://github.com/yourusername/powerai
+- **Email**: hlomohangsethuntsa3@gmail.com
+- **Live Demo**: https://powerai-lesotho.streamlit.app/
+- **GitHub**: https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI
+- **Documentation**: See DOCUMENTATION.md
 
 ---
 

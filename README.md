@@ -336,8 +336,9 @@ This project is licensed under the MIT License - see LICENSE file for details.
 **Program**: Power Learn Project Software Development Scholarship  
 **Specialization**: AI for Software Engineering
 
-- **GitHub**: [github.com/yourusername/powerai](https://github.com/yourusername/powerai)
-- **Email**: support@powerai.co.ls
+- **GitHub**: [github.com/Hlomohangcue/PLP-Final-Project-PowerAI](https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI)
+- **Live Demo**: [powerai-lesotho.streamlit.app](https://powerai-lesotho.streamlit.app/)
+- **Email**: hlomohangsethuntsa3@gmail.com
 - **Documentation**: See DOCUMENTATION.md
 - **Issues**: [GitHub Issues](https://github.com/yourusername/powerai/issues)
 

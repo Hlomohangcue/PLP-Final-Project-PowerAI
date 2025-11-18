@@ -37,7 +37,7 @@ The application will run without pre-trained models, but forecasting accuracy wi
 
 If you have access to pre-trained models from the original developer:
 
-1. Contact: support@powerai.co.ls
+1. Contact: hlomohangsethuntsa3@gmail.com
 2. Request model files
 3. Place them in this `models/` directory
 

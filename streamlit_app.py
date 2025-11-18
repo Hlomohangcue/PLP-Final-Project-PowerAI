@@ -493,7 +493,7 @@ def show_forecasting_page(company_config):
         
         **To enable full forecasting:**
         1. Train models using the Jupyter notebook: `notebooks/PowerAI_Model_Training.ipynb`
-        2. Or contact support@powerai.co.ls for pre-trained model files
+        2. Or contact hlomohangsethuntsa3@gmail.com for pre-trained model files
         
         **Demo mode is available** - Using simplified forecasting algorithms for demonstration.
         """)

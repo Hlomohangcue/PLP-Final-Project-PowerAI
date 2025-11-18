@@ -4,9 +4,10 @@
 FROM python:3.9-slim
 
 # Set maintainer
-LABEL maintainer="Hlomohang Sethuntsa <support@powerai.co.ls>"
+LABEL maintainer="Hlomohang Sethuntsa <hlomohangsethuntsa3@gmail.com>"
 LABEL description="PowerAI - Intelligent Renewable Energy Management System"
 LABEL version="1.0"
+LABEL url="https://powerai-lesotho.streamlit.app/"
 
 # Set working directory
 WORKDIR /app

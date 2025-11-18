@@ -312,7 +312,9 @@ PowerAI directly supports **UN Sustainable Development Goal 7: Affordable and Cl
 ### Contact
 - **Developer**: Hlomohang Sethuntsa
 - **Organization**: PowerAI Lesotho
-- **Email**: support@powerai.co.ls
+- **Email**: hlomohangsethuntsa3@gmail.com
+- **Live Demo**: [powerai-lesotho.streamlit.app](https://powerai-lesotho.streamlit.app/)
+- **GitHub**: [github.com/Hlomohangcue/PLP-Final-Project-PowerAI](https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI)
 - **Program**: Power Learn Project Software Development Scholarship
 
 ---

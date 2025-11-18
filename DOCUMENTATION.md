@@ -575,9 +575,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, support, or collaboration opportunities:
 
-- **Email**: contact@powerai.co.ls
+- **Email**: hlomohangsethuntsa3@gmail.com
 - **Organization**: PowerAI Lesotho
 - **Project**: PLP Software Development Scholarship
+- **Live Demo**: [powerai-lesotho.streamlit.app](https://powerai-lesotho.streamlit.app/)
+- **GitHub**: [github.com/Hlomohangcue/PLP-Final-Project-PowerAI](https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI)
 
 ---
 

@@ -148,4 +148,7 @@ if not os.path.exists('models/arima_model.pkl'):
 
 ---
 
-**Need help?** Contact: support@powerai.co.ls
+**Need help?** 
+- **Email**: hlomohangsethuntsa3@gmail.com
+- **Live Demo**: [powerai-lesotho.streamlit.app](https://powerai-lesotho.streamlit.app/)
+- **GitHub**: [github.com/Hlomohangcue/PLP-Final-Project-PowerAI](https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI)
