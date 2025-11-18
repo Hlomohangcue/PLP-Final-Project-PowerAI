@@ -1,0 +1,40 @@
+# Streamlit Configuration for PowerAI
+# This file customizes the appearance and behavior of the Streamlit app
+
+[server]
+# Server settings
+port = 8501
+address = "0.0.0.0"
+headless = true
+enableCORS = true
+enableXsrfProtection = true
+maxUploadSize = 200
+
+[browser]
+# Browser settings
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[theme]
+# Custom theme matching OnePower branding
+primaryColor = "#2c5530"
+backgroundColor = "#f8f9fa"
+secondaryBackgroundColor = "#e0e0e0"
+textColor = "#262730"
+font = "sans serif"
+
+[runner]
+# Runner settings
+magicEnabled = true
+fastReruns = true
+
+[client]
+# Client settings
+showErrorDetails = true
+toolbarMode = "minimal"
+
+[logger]
+# Logging settings
+level = "info"
+messageFormat = "%(asctime)s %(levelname)s: %(message)s"

@@ -1,0 +1,43 @@
+# PowerAI - Renewable Energy Management System
+# Streamlit Version Requirements
+# Python >= 3.8 Required
+
+# Core Framework
+streamlit==1.29.0
+
+# Data Processing & Analysis
+pandas==2.0.3
+numpy==1.24.3
+
+# Machine Learning & Forecasting
+scikit-learn==1.3.2
+statsmodels==0.14.0
+tensorflow==2.13.0
+
+# Visualization
+plotly==5.17.0
+
+# Pre-trained Models Support
+joblib==1.3.2
+
+# Configuration & Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# Database Support (Optional)
+pymysql==1.1.0
+sqlalchemy==2.0.23
+
+# Additional ML Libraries (Optional)
+# prophet==1.1.4  # Uncomment if using Prophet models
+
+# System Requirements
+# - Python 3.8 or higher
+# - 4GB RAM minimum (8GB recommended)
+# - Pre-trained models in /models folder
+
+# Installation:
+# pip install -r requirements-streamlit.txt
+
+# Running the application:
+# streamlit run streamlit_app.py
