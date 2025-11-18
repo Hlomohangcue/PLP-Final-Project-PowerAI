@@ -541,6 +541,27 @@ def show_forecasting_page(company_config):
     if st.session_state.pretrained_loader and st.session_state.pretrained_loader.models_available():
         st.success("✅ Using pre-trained models for instant predictions")
         
+        # Check which models loaded
+        models_loaded = []
+        if st.session_state.pretrained_loader.arima_available:
+            models_loaded.append('ARIMA')
+        if st.session_state.pretrained_loader.sarimax_available:
+            models_loaded.append('SARIMAX')
+        if st.session_state.pretrained_loader.lstm_available:
+            models_loaded.append('LSTM')
+        
+        # Show info about missing models
+        if len(models_loaded) < 3:
+            missing_models = [m for m in ['ARIMA', 'SARIMAX', 'LSTM'] if m not in models_loaded]
+            st.info(f"""
+            💡 **Note**: Some models not loaded: {', '.join(missing_models)}
+            
+            This is normal for cloud deployments where large model files (LSTM: 4GB, SARIMAX: 1.2GB) 
+            may timeout during download. ARIMA model provides accurate forecasts for most use cases.
+            
+            For full model suite, run locally: `streamlit run streamlit_app.py`
+            """)
+        
         # Generate forecast
         with st.spinner("Generating 24-hour forecast..."):
             try:
@@ -596,11 +617,31 @@ def show_forecasting_page(company_config):
                 
                 with col1:
                     models_used = forecast_result.get('models_used', [])
-                    models_status = '\n'.join([f"- {m.upper()}: ✅" for m in models_used])
-                    st.info(f"""
-                    **Models Available:**
-{models_status}
-                    """)
+                    # Show all models with their status
+                    all_models = ['sarimax', 'arima', 'lstm']
+                    model_status_list = []
+                    for model in all_models:
+                        if model in models_used:
+                            model_status_list.append(f"- {model.upper()}: ✅")
+                        else:
+                            model_status_list.append(f"- {model.upper()}: ⏭️ (not loaded)")
+                    
+                    models_status = '\n'.join(model_status_list)
+                    
+                    if len(models_used) == 0:
+                        status_color = "warning"
+                        status_msg = "**⚠️ No models loaded** - Using demo mode"
+                    elif len(models_used) < 3:
+                        status_color = "info"
+                        status_msg = f"**✅ {len(models_used)}/{len(all_models)} models active**"
+                    else:
+                        status_color = "success"
+                        status_msg = f"**✅ All {len(models_used)} models active**"
+                    
+                    if status_color == "warning":
+                        st.warning(f"{status_msg}\n\n{models_status}")
+                    else:
+                        st.info(f"{status_msg}\n\n{models_status}")
                 
                 with col2:
                     st.info(f"""
