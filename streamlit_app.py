@@ -463,6 +463,59 @@ def show_forecasting_page(company_config):
     """, unsafe_allow_html=True)
     
     # Check for pre-trained models
+    if not st.session_state.pretrained_loader or not st.session_state.pretrained_loader.models_available():
+        st.warning("""
+        ⚠️ **Pre-trained models not available**
+        
+        The AI forecasting models are not currently loaded. This is normal for cloud deployments where model files exceed GitHub's size limits.
+        
+        **To enable full forecasting:**
+        1. Train models using the Jupyter notebook: `notebooks/PowerAI_Model_Training.ipynb`
+        2. Or contact support@powerai.co.ls for pre-trained model files
+        
+        **Demo mode is available** - Using simplified forecasting algorithms for demonstration.
+        """)
+        
+        # Generate basic forecast using simple pattern
+        st.info("📊 Generating forecast using basic pattern analysis...")
+        company_id = st.session_state.get('selected_company', 'onepower').lower()
+        
+        # Simple hourly pattern forecast
+        hours = list(range(1, 25))
+        base_demand = 500
+        hourly_pattern = [base_demand + 200 * np.sin((h - 6) * np.pi / 12) for h in hours]
+        
+        forecast_df = pd.DataFrame({
+            'Hour': hours,
+            'Predicted Demand (kW)': hourly_pattern
+        })
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=forecast_df['Hour'],
+            y=forecast_df['Predicted Demand (kW)'],
+            mode='lines+markers',
+            name='Basic Forecast',
+            line=dict(color='#999', width=2, dash='dash'),
+            marker=dict(size=6)
+        ))
+        
+        fig.update_layout(
+            title='24-Hour Demand Forecast (Demo Mode)',
+            xaxis_title='Hour',
+            yaxis_title='Demand (kW)',
+            template='plotly_white',
+            hovermode='x unified'
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.info("""
+        💡 **This is a simplified forecast pattern**. For accurate AI predictions with ARIMA, LSTM, and SARIMAX models, 
+        please train the models locally or deploy with model files.
+        """)
+        return
+        
     if st.session_state.pretrained_loader and st.session_state.pretrained_loader.models_available():
         st.success("✅ Using pre-trained models for instant predictions")
         
@@ -784,6 +837,16 @@ def show_about_page():
     ## 📞 Contact
     
     For more information or support, please contact PowerAI Lesotho.
+    
+    ## ℹ️ Deployment Note
+    
+    **Pre-trained Models:** Due to file size limitations on cloud platforms, AI models (ARIMA, SARIMAX, LSTM)
+    are not included in the deployed version. The app runs in demo mode with simplified forecasting.
+    
+    To use full AI capabilities:
+    - Clone the repository: [github.com/Hlomohangcue/PLP-Final-Project-PowerAI](https://github.com/Hlomohangcue/PLP-Final-Project-PowerAI)
+    - Train models using `notebooks/PowerAI_Model_Training.ipynb`
+    - Run locally with `streamlit run streamlit_app.py`
     
     ---
     
