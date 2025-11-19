@@ -318,19 +318,35 @@ def main():
         
         # For demo, allow selecting different companies
         st.markdown("### 🏢 Company View")
-        companies = st.session_state.config.multi_tenant.get_all_companies()
-        company_options = {f"{config.company_name} ({config.country})": company_id 
-                          for company_id, config in companies.items()}
+        # Refresh companies to include newly registered ones
+        companies = st.session_state.config.multi_tenant.get_all_companies(refresh=True)
         
-        selected_display = st.selectbox(
-            "View data for:",
-            options=list(company_options.keys()),
-            index=0 if not st.session_state.selected_company else 
-                  list(company_options.values()).index(st.session_state.selected_company)
-        )
-        
-        st.session_state.selected_company = company_options[selected_display]
-        company_config = companies[st.session_state.selected_company]
+        # If no companies found, show message
+        if not companies:
+            st.warning("No companies available. Please register a company first.")
+            company_config = None
+        else:
+            company_options = {f"{config.company_name} ({config.country})": company_id 
+                              for company_id, config in companies.items()}
+            
+            # Set default to user's own company if not selected
+            default_company = user_info.get('company_id', list(company_options.values())[0])
+            if not st.session_state.selected_company or st.session_state.selected_company not in company_options.values():
+                st.session_state.selected_company = default_company
+            
+            try:
+                current_index = list(company_options.values()).index(st.session_state.selected_company)
+            except ValueError:
+                current_index = 0
+            
+            selected_display = st.selectbox(
+                "View data for:",
+                options=list(company_options.keys()),
+                index=current_index
+            )
+            
+            st.session_state.selected_company = company_options[selected_display]
+            company_config = companies[st.session_state.selected_company]
         
         st.markdown("---")
         
@@ -346,11 +362,12 @@ def main():
         st.markdown("---")
         
         # Company Info
-        st.markdown("### Company Information")
-        st.markdown(f"**Name:** {company_config.company_name}")
-        st.markdown(f"**Country:** {company_config.country}")
-        st.markdown(f"**Type:** {', '.join(company_config.renewable_types)}")
-        st.markdown(f"**Currency:** {company_config.currency}")
+        if company_config:
+            st.markdown("### Company Information")
+            st.markdown(f"**Name:** {company_config.company_name}")
+            st.markdown(f"**Country:** {company_config.country}")
+            st.markdown(f"**Type:** {', '.join(company_config.renewable_types)}")
+            st.markdown(f"**Currency:** {company_config.currency}")
         
         st.markdown("---")
         
@@ -379,6 +396,11 @@ def main():
         st.warning("⚠️ Your free trial has expired. Please upgrade to continue using PowerAI.")
         if st.button("Upgrade Now", type="primary"):
             page = "💎 Subscription"
+    
+    # Check if company config is available
+    if not company_config and page not in ["💎 Subscription", "ℹ️ About"]:
+        st.error("⚠️ No company data available. Please contact support.")
+        return
     
     # Check feature access based on subscription
     if page == "🏠 Dashboard":

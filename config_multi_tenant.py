@@ -91,9 +91,54 @@ class MultiTenantConfig:
             except Exception as e:
                 print(f"Error loading companies config: {e}")
         
-        # If no companies loaded, create default demo company
+        # Load registered companies from users_data.json
+        self._load_registered_companies()
+        
+        # If no companies loaded, create default demo companies
         if not self.companies:
             self._create_default_companies()
+    
+    def _load_registered_companies(self):
+        """Load registered companies from users_data.json and add to company configs"""
+        users_file = 'users_data.json'
+        
+        if os.path.exists(users_file):
+            try:
+                with open(users_file, 'r') as f:
+                    users_data = json.load(f)
+                    
+                # Extract companies from users_data
+                registered_companies = users_data.get('companies', {})
+                
+                for company_id, company_data in registered_companies.items():
+                    # Convert registered company to CompanyConfig format
+                    config_data = {
+                        'company_name': company_data.get('company_name', 'Unknown Company'),
+                        'company_description': f"Registered company in {company_data.get('country', 'Unknown')}",
+                        'address': f"{company_data.get('country', 'Unknown')}",
+                        'country': company_data.get('country', 'Unknown'),
+                        'currency': company_data.get('settings', {}).get('currency', 'USD'),
+                        'timezone': company_data.get('settings', {}).get('timezone', 'UTC'),
+                        'brand_color_primary': '#2E7D32',
+                        'brand_color_secondary': '#4CAF50',
+                        'renewable_types': company_data.get('settings', {}).get('renewable_types', ['solar', 'wind', 'hydro']),
+                        'grid_voltage': 230,
+                        'grid_frequency': 50,
+                        'customer_segments': ['residential', 'commercial', 'industrial'],
+                        'capacity_mw': company_data.get('settings', {}).get('grid_capacity_mw', 100.0),
+                        'enable_lstm_models': True,
+                        'enable_prophet_models': True,
+                        'forecast_horizon_hours': 24,
+                        'subscription_tier': company_data.get('subscription_tier', 'free'),
+                        'created_at': company_data.get('created_at', ''),
+                        'owner': company_data.get('owner', '')
+                    }
+                    
+                    # Add or update company config
+                    self.companies[company_id] = CompanyConfig(company_id, config_data)
+                    
+            except Exception as e:
+                print(f"Error loading registered companies: {e}")
     
     def _create_default_companies(self):
         """Create default company configurations for demonstration"""
@@ -193,8 +238,11 @@ class MultiTenantConfig:
         
         return self.companies.get(company_id, self.companies[self.default_company_id])
     
-    def get_all_companies(self) -> Dict[str, CompanyConfig]:
+    def get_all_companies(self, refresh=False) -> Dict[str, CompanyConfig]:
         """Get all company configurations"""
+        # Optionally refresh from users_data.json to get newly registered companies
+        if refresh:
+            self._load_registered_companies()
         return self.companies
     
     def add_company(self, company_id: str, config_data: Dict[str, Any]) -> bool:
