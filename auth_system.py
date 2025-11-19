@@ -1,6 +1,6 @@
 """
 PowerAI Authentication and User Management System
-Handles user registration, login, and company management
+Handles user registration, login, company management, and password reset
 """
 import json
 import hashlib
@@ -18,6 +18,9 @@ class AuthSystem:
     def __init__(self, data_file: str = "users_data.json"):
         self.data_file = Path(data_file)
         self.users_db = self._load_users()
+        # Initialize reset tokens storage if not exists
+        if "reset_tokens" not in self.users_db:
+            self.users_db["reset_tokens"] = {}
     
     def _load_users(self) -> Dict:
         """Load users from JSON file"""
@@ -27,8 +30,8 @@ class AuthSystem:
                     return json.load(f)
             except Exception as e:
                 logger.error(f"Error loading users: {e}")
-                return {"users": {}, "companies": {}}
-        return {"users": {}, "companies": {}}
+                return {"users": {}, "companies": {}, "reset_tokens": {}}
+        return {"users": {}, "companies": {}, "reset_tokens": {}}
     
     def _save_users(self):
         """Save users to JSON file"""
@@ -196,6 +199,111 @@ class AuthSystem:
             }
             for cid, info in self.users_db["companies"].items()
         ]
+    
+    def request_password_reset(self, email: str) -> Dict:
+        """Generate password reset token for user"""
+        # Find user by email
+        username = None
+        for uname, user in self.users_db["users"].items():
+            if user["email"].lower() == email.lower():
+                username = uname
+                break
+        
+        if not username:
+            # Don't reveal if email exists for security
+            return {
+                "success": True,
+                "message": "If this email is registered, you will receive a password reset link.",
+                "email_found": False
+            }
+        
+        # Generate secure reset token
+        reset_token = secrets.token_urlsafe(32)
+        
+        # Store token with expiration (1 hour)
+        self.users_db["reset_tokens"][reset_token] = {
+            "username": username,
+            "email": email,
+            "created_at": datetime.now().isoformat(),
+            "expires_at": (datetime.now() + timedelta(hours=1)).isoformat(),
+            "used": False
+        }
+        
+        self._save_users()
+        
+        return {
+            "success": True,
+            "message": "If this email is registered, you will receive a password reset link.",
+            "email_found": True,
+            "username": username,
+            "reset_token": reset_token
+        }
+    
+    def verify_reset_token(self, token: str) -> Dict:
+        """Verify if reset token is valid"""
+        if token not in self.users_db["reset_tokens"]:
+            return {"valid": False, "message": "Invalid or expired reset token"}
+        
+        token_data = self.users_db["reset_tokens"][token]
+        
+        # Check if already used
+        if token_data["used"]:
+            return {"valid": False, "message": "This reset link has already been used"}
+        
+        # Check if expired
+        expires_at = datetime.fromisoformat(token_data["expires_at"])
+        if datetime.now() > expires_at:
+            return {"valid": False, "message": "This reset link has expired. Please request a new one."}
+        
+        return {
+            "valid": True,
+            "username": token_data["username"],
+            "email": token_data["email"]
+        }
+    
+    def reset_password(self, token: str, new_password: str) -> Dict:
+        """Reset user password using token"""
+        # Verify token
+        verification = self.verify_reset_token(token)
+        if not verification["valid"]:
+            return {"success": False, "message": verification["message"]}
+        
+        username = verification["username"]
+        
+        # Update password
+        pwd_hash, salt = self._hash_password(new_password)
+        self.users_db["users"][username]["password_hash"] = pwd_hash
+        self.users_db["users"][username]["salt"] = salt
+        
+        # Mark token as used
+        self.users_db["reset_tokens"][token]["used"] = True
+        self.users_db["reset_tokens"][token]["used_at"] = datetime.now().isoformat()
+        
+        self._save_users()
+        
+        return {
+            "success": True,
+            "message": "Password reset successful! You can now login with your new password.",
+            "username": username
+        }
+    
+    def cleanup_expired_tokens(self):
+        """Remove expired reset tokens"""
+        current_time = datetime.now()
+        tokens_to_remove = []
+        
+        for token, data in self.users_db["reset_tokens"].items():
+            expires_at = datetime.fromisoformat(data["expires_at"])
+            # Remove tokens older than 24 hours
+            if current_time > expires_at + timedelta(hours=23):
+                tokens_to_remove.append(token)
+        
+        for token in tokens_to_remove:
+            del self.users_db["reset_tokens"][token]
+        
+        if tokens_to_remove:
+            self._save_users()
+            logger.info(f"Cleaned up {len(tokens_to_remove)} expired reset tokens")
 
 
 if __name__ == "__main__":

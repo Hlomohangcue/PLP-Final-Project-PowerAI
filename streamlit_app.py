@@ -30,6 +30,10 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import our custom modules
 from config_multi_tenant import PowerAIConfig
@@ -277,6 +281,16 @@ def create_renewable_pie_chart(data):
 def main():
     """Main application function with authentication"""
     
+    # Check for reset token in URL parameters
+    query_params = st.query_params
+    reset_token = query_params.get("reset_token", None)
+    
+    if reset_token:
+        # Show reset password page
+        from auth_pages import show_reset_password_page
+        show_reset_password_page(reset_token)
+        return
+    
     # Check if user is authenticated
     if not st.session_state.get("authenticated", False):
         # Show landing page with register/login options
@@ -284,6 +298,9 @@ def main():
         
         if page == "register":
             show_registration_page()
+        elif page == "forgot_password":
+            from auth_pages import show_forgot_password_page
+            show_forgot_password_page()
         else:
             show_login_page()
         return

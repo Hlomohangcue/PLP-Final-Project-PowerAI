@@ -1,11 +1,15 @@
 """
 PowerAI Authentication and Subscription Pages for Streamlit
-Enhanced UI for registration, login, and subscription management
+Enhanced UI for registration, login, subscription management, and password reset
 """
 import streamlit as st
 from auth_system import AuthSystem
 from subscription_system import SubscriptionManager, format_price, get_tier_badge
+from email_service import EmailService
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 def validate_email(email: str) -> bool:
     """Validate email format"""
@@ -124,6 +128,17 @@ def show_registration_page():
                     st.success("🎉 " + result["message"])
                     st.balloons()
                     
+                    # Try to send welcome email
+                    try:
+                        email_service = EmailService()
+                        email_service.send_welcome_email(
+                            to_email=email,
+                            username=username,
+                            company_name=company_name
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to send welcome email: {e}")
+                    
                     # Auto login
                     login_result = auth.login(username, password)
                     if login_result["success"]:
@@ -181,11 +196,152 @@ def show_login_page():
         col_forgot, col_register = st.columns(2)
         with col_forgot:
             if st.button("Forgot Password?"):
-                st.info("Password reset feature coming soon!")
+                st.session_state.page = "forgot_password"
+                st.rerun()
         with col_register:
             if st.button("Create Account"):
                 st.session_state.page = "register"
                 st.rerun()
+
+def show_forgot_password_page():
+    """Forgot password page - request reset email"""
+    st.markdown('<h1 class="main-header">🔐 Reset Your Password</h1>', 
+                unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.markdown("""
+        <div style='text-align: center; margin-bottom: 2rem;'>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("forgot_password_form"):
+            email = st.text_input("Email Address", placeholder="your-email@example.com")
+            
+            submit_button = st.form_submit_button("Send Reset Link", use_container_width=True)
+            
+            if submit_button:
+                if not email:
+                    st.error("Please enter your email address")
+                elif not validate_email(email):
+                    st.error("Please enter a valid email address")
+                else:
+                    # Request password reset
+                    auth = AuthSystem()
+                    result = auth.request_password_reset(email)
+                    
+                    if result["success"]:
+                        # Send email if user found
+                        if result.get("email_found"):
+                            email_service = EmailService()
+                            email_result = email_service.send_password_reset_email(
+                                to_email=email,
+                                username=result["username"],
+                                reset_token=result["reset_token"]
+                            )
+                            
+                            if email_result["success"]:
+                                st.success("✅ Password reset link sent! Check your email inbox.")
+                                st.info("💡 The link will expire in 1 hour.")
+                            elif email_result.get("demo_mode"):
+                                # Email service not configured - show token directly
+                                st.warning("⚠️ Email service not configured. Here's your reset link:")
+                                reset_link = f"?reset_token={result['reset_token']}"
+                                st.code(reset_link, language=None)
+                                st.info("Copy this and add it to your browser URL after the main URL")
+                                st.markdown("---")
+                                st.markdown("**To enable email functionality:**")
+                                st.markdown("1. Get a Gmail App Password from: https://myaccount.google.com/apppasswords")
+                                st.markdown("2. Set environment variables:")
+                                st.code("SENDER_EMAIL=your-email@gmail.com\nSENDER_PASSWORD=your-app-password")
+                            else:
+                                st.error(f"Failed to send email: {email_result['message']}")
+                        else:
+                            # Show same message for security
+                            st.success("✅ If this email is registered, you will receive a password reset link.")
+        
+        st.markdown("---")
+        
+        col_back, col_register = st.columns(2)
+        with col_back:
+            if st.button("← Back to Login"):
+                st.session_state.page = "login"
+                st.rerun()
+        with col_register:
+            if st.button("Create Account"):
+                st.session_state.page = "register"
+                st.rerun()
+
+def show_reset_password_page(reset_token: str):
+    """Reset password page - create new password"""
+    st.markdown('<h1 class="main-header">🔐 Create New Password</h1>', 
+                unsafe_allow_html=True)
+    
+    # Verify token first
+    auth = AuthSystem()
+    verification = auth.verify_reset_token(reset_token)
+    
+    if not verification["valid"]:
+        st.error(f"❌ {verification['message']}")
+        st.markdown("---")
+        if st.button("Request New Reset Link"):
+            st.session_state.page = "forgot_password"
+            st.rerun()
+        return
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.success(f"✅ Resetting password for: **{verification['username']}**")
+        st.info(f"📧 Email: {verification['email']}")
+        
+        st.markdown("---")
+        
+        with st.form("reset_password_form"):
+            new_password = st.text_input("New Password", type="password",
+                                        placeholder="Min 8 chars, 1 upper, 1 number")
+            confirm_password = st.text_input("Confirm New Password", type="password")
+            
+            submit_button = st.form_submit_button("Reset Password", use_container_width=True)
+            
+            if submit_button:
+                # Validation
+                errors = []
+                
+                is_strong, msg = validate_password(new_password)
+                if not is_strong:
+                    errors.append(msg)
+                
+                if new_password != confirm_password:
+                    errors.append("Passwords do not match")
+                
+                if errors:
+                    for error in errors:
+                        st.error(error)
+                else:
+                    # Reset password
+                    result = auth.reset_password(reset_token, new_password)
+                    
+                    if result["success"]:
+                        st.success("🎉 " + result["message"])
+                        st.balloons()
+                        
+                        # Auto-redirect to login after 3 seconds
+                        st.info("Redirecting to login page...")
+                        import time
+                        time.sleep(2)
+                        st.session_state.page = "login"
+                        st.rerun()
+                    else:
+                        st.error(result["message"])
+        
+        st.markdown("---")
+        
+        if st.button("← Back to Login"):
+            st.session_state.page = "login"
+            st.rerun()
 
 def show_subscription_page(user_info: dict):
     """Subscription management and upgrade page"""
